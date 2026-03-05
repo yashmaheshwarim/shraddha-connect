@@ -14,7 +14,200 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      announcements: {
+        Row: {
+          created_at: string
+          id: string
+          message: string
+          sent_to_count: number | null
+          teacher_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message: string
+          sent_to_count?: number | null
+          teacher_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string
+          sent_to_count?: number | null
+          teacher_id?: string
+        }
+        Relationships: []
+      }
+      attendance: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          status: string
+          student_id: string
+          teacher_id: string
+        }
+        Insert: {
+          created_at?: string
+          date?: string
+          id?: string
+          status: string
+          student_id: string
+          teacher_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          status?: string
+          student_id?: string
+          teacher_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      exams: {
+        Row: {
+          created_at: string
+          date: string
+          id: string
+          name: string
+          subject: string
+          teacher_id: string
+          total_marks: number
+        }
+        Insert: {
+          created_at?: string
+          date?: string
+          id?: string
+          name: string
+          subject: string
+          teacher_id: string
+          total_marks: number
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          id?: string
+          name?: string
+          subject?: string
+          teacher_id?: string
+          total_marks?: number
+        }
+        Relationships: []
+      }
+      marks: {
+        Row: {
+          created_at: string
+          exam_id: string
+          id: string
+          marks_obtained: number
+          student_id: string
+          teacher_id: string
+        }
+        Insert: {
+          created_at?: string
+          exam_id: string
+          id?: string
+          marks_obtained: number
+          student_id: string
+          teacher_id: string
+        }
+        Update: {
+          created_at?: string
+          exam_id?: string
+          id?: string
+          marks_obtained?: number
+          student_id?: string
+          teacher_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marks_exam_id_fkey"
+            columns: ["exam_id"]
+            isOneToOne: false
+            referencedRelation: "exams"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marks_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          id: string
+          institution_name: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          institution_name?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          institution_name?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      students: {
+        Row: {
+          class: string | null
+          created_at: string
+          id: string
+          name: string
+          phone: string | null
+          roll_number: string | null
+          teacher_id: string
+          updated_at: string
+          whatsapp_number: string | null
+        }
+        Insert: {
+          class?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          phone?: string | null
+          roll_number?: string | null
+          teacher_id: string
+          updated_at?: string
+          whatsapp_number?: string | null
+        }
+        Update: {
+          class?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          phone?: string | null
+          roll_number?: string | null
+          teacher_id?: string
+          updated_at?: string
+          whatsapp_number?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
