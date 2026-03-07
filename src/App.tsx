@@ -11,6 +11,7 @@ import Students from "@/pages/Students";
 import Attendance from "@/pages/Attendance";
 import Marks from "@/pages/Marks";
 import Announcements from "@/pages/Announcements";
+import AttendanceReports from "@/pages/AttendanceReports";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -41,6 +42,7 @@ const App = () => (
             <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/students" element={<ProtectedRoute><Students /></ProtectedRoute>} />
             <Route path="/attendance" element={<ProtectedRoute><Attendance /></ProtectedRoute>} />
+            <Route path="/attendance-reports" element={<ProtectedRoute><AttendanceReports /></ProtectedRoute>} />
             <Route path="/marks" element={<ProtectedRoute><Marks /></ProtectedRoute>} />
             <Route path="/announcements" element={<ProtectedRoute><Announcements /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />

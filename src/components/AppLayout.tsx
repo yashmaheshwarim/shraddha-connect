@@ -1,7 +1,7 @@
 import { ReactNode, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Link, useLocation } from 'react-router-dom';
-import { GraduationCap, LayoutDashboard, Users, ClipboardCheck, FileText, Megaphone, LogOut, Menu, X } from 'lucide-react';
+import { GraduationCap, LayoutDashboard, Users, ClipboardCheck, FileText, Megaphone, LogOut, Menu, X, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -9,6 +9,7 @@ const navItems = [
   { to: '/', icon: LayoutDashboard, label: 'Dashboard' },
   { to: '/students', icon: Users, label: 'Students' },
   { to: '/attendance', icon: ClipboardCheck, label: 'Attendance' },
+  { to: '/attendance-reports', icon: BarChart3, label: 'Reports' },
   { to: '/marks', icon: FileText, label: 'Marks & Exams' },
   { to: '/announcements', icon: Megaphone, label: 'Announcements' },
 ];
