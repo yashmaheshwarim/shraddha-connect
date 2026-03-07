@@ -1,7 +1,7 @@
 import { ReactNode, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { Link, useLocation } from 'react-router-dom';
-import { GraduationCap, LayoutDashboard, Users, ClipboardCheck, FileText, Megaphone, LogOut, Menu, X } from 'lucide-react';
+import { GraduationCap, LayoutDashboard, Users, ClipboardCheck, FileText, Megaphone, LogOut, Menu, X, BarChart3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
