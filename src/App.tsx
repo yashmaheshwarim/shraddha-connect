@@ -11,6 +11,7 @@ import Students from "@/pages/Students";
 import Attendance from "@/pages/Attendance";
 import Marks from "@/pages/Marks";
 import Announcements from "@/pages/Announcements";
+import AttendanceReports from "@/pages/AttendanceReports";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
