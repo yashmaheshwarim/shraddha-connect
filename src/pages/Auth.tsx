@@ -77,6 +77,10 @@ const Auth = () => {
           </CardContent>
         </Card>
       </div>
+      <div className="text-center mt-8 text-xs text-muted-foreground space-y-1">
+        <p>Powered by <span className="font-semibold text-foreground">Maheshwari Tech</span></p>
+        <p>Proudly Made in India ❤️</p>
+      </div>
     </div>
   );
 };
