@@ -1,6 +1,7 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, type ChangeEvent } from 'react';
 import { useAuth } from '@/hooks/useAuth';
-import { useQuery } from '@tanstack/react-query';
+import { useToast } from '@/hooks/use-toast';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,7 +9,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
-import { Download, Users, CheckCircle, XCircle, Clock, BarChart3 } from 'lucide-react';
+import { exportToExcel, parseExcelFile } from '@/lib/excel';
+import { Download, Upload, Users, CheckCircle, XCircle, Clock, BarChart3 } from 'lucide-react';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
@@ -38,6 +40,9 @@ const AttendanceReports = () => {
       return data;
     },
   });
+
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
 
   const { data: attendance = [] } = useQuery({
     queryKey: ['attendance-report', startDate, endDate],
@@ -107,6 +112,84 @@ const AttendanceReports = () => {
 
   const years = Array.from({ length: 5 }, (_, i) => String(now.getFullYear() - 2 + i));
 
+  const importInputRef = useRef<HTMLInputElement | null>(null);
+
+  const exportAttendanceExcel = () => {
+    if (attendance.length === 0) return;
+
+    const summaryData = report.map((r, i) => ({
+      '#': i + 1,
+      Student: r.name,
+      Class: r.class || '',
+      Present: r.present,
+      Absent: r.absent,
+      Late: r.late,
+      Total: r.total,
+      'Attendance %': `${r.percentage}%`,
+    }));
+
+    const dateWiseData = attendance.map((record: any) => {
+      const student = students.find((s: any) => s.id === record.student_id);
+      return {
+        Date: record.date,
+        Student: student?.name ?? record.student_id,
+        Class: student?.class || '',
+        Status: record.status,
+      };
+    });
+
+    exportToExcel(
+      [
+        { name: 'Summary', data: summaryData },
+        { name: 'Date-wise Attendance', data: dateWiseData },
+      ], `AttendanceReport_${months[monthNum]}_${yearNum}.xlsx`
+    );
+  };
+
+  const handleAttendanceImport = async (file: File) => {
+    try {
+      const parsed = await parseExcelFile(file);
+      const records = parsed.map((row) => {
+        const studentName = String(row.Student ?? row.Name ?? row.student ?? row.name ?? '').trim();
+        const statusValue = String(row.Status ?? row.status ?? '').trim().toLowerCase();
+        const dateValue = String(row.Date ?? row.date ?? '').trim();
+
+        const student = students.find((s: any) => s.name.toLowerCase() === studentName.toLowerCase());
+        return {
+          student,
+          date: dateValue,
+          status: statusValue,
+        };
+      }).filter((item) => item.student && ['present', 'absent', 'late'].includes(item.status) && item.date);
+
+      if (records.length === 0) {
+        throw new Error('No valid attendance rows found in the file.');
+      }
+
+      const payload = records.map((item) => ({
+        student_id: item.student.id,
+        teacher_id: user!.id,
+        date: item.date,
+        status: item.status,
+      }));
+
+      const { error } = await supabase.from('attendance').upsert(payload, { onConflict: 'student_id,date' });
+      if (error) throw error;
+
+      queryClient.invalidateQueries({ queryKey: ['attendance-report', startDate, endDate] });
+      toast({ title: 'Attendance imported!', description: `${payload.length} rows processed.` });
+    } catch (e: any) {
+      toast({ title: 'Import failed', description: e?.message || 'Unable to read the Excel file.', variant: 'destructive' });
+    }
+  };
+
+  const handleAttendanceFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    await handleAttendanceImport(file);
+    e.target.value = '';
+  };
+
   const getPercentageColor = (pct: number) => {
     if (pct >= 75) return 'text-success';
     if (pct >= 50) return 'text-warning';
@@ -120,7 +203,7 @@ const AttendanceReports = () => {
           <h1 className="text-3xl font-heading font-bold text-foreground">Attendance Reports</h1>
           <p className="text-muted-foreground">Monthly summaries & student-wise analytics</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <Select value={selectedMonth} onValueChange={setSelectedMonth}>
             <SelectTrigger className="w-[130px]"><SelectValue /></SelectTrigger>
             <SelectContent>
@@ -136,8 +219,21 @@ const AttendanceReports = () => {
           <Button onClick={downloadPDF} disabled={report.length === 0} className="gradient-primary text-primary-foreground">
             <Download className="w-4 h-4 mr-2" />PDF
           </Button>
+          <Button onClick={exportAttendanceExcel} disabled={attendance.length === 0} className="gradient-primary text-primary-foreground">
+            <Download className="w-4 h-4 mr-2" />Export Excel
+          </Button>
+          <Button onClick={() => importInputRef.current?.click()} variant="outline">
+            <Upload className="w-4 h-4 mr-2" />Import Excel
+          </Button>
         </div>
       </div>
+      <input
+        ref={importInputRef}
+        type="file"
+        accept=".xlsx,.xls"
+        className="hidden"
+        onChange={handleAttendanceFileChange}
+      />
 
       {/* Summary Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-6">
